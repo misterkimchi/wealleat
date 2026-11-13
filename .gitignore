@@ -1,0 +1,19 @@
+# secrets: never commit these
+.env
+.env.*
+!.env.example
+*.key
+service-account*.json
+
+# dependencies and builds
+node_modules/
+__pycache__/
+dist/
+build/
+.firebase/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
