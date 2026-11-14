@@ -241,11 +241,24 @@ select.input{width:auto;min-width:0;max-width:100%}
 .impact span{font-size:14px;color:var(--ink-2)}
 @media (max-width:620px){.impact{grid-template-columns:1fr}}
 
-.subtabs{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);overflow-x:auto}
-.subtab{border:0;background:none;padding:8px 14px;font-weight:700;font-size:15px;color:var(--ink-2);cursor:pointer;border-radius:999px;white-space:nowrap;display:flex;gap:7px;align-items:center}
-.subtab:hover{background:var(--tint)}
-.subtab[aria-selected="true"]{background:var(--ink);color:#fff}
-.subtab .n{font-size:12px;background:var(--tint);color:var(--ink);border-radius:9px;padding:0 7px}
+/* folder-style tabs: every tab looks like a tab you can click, the open one joins the panel below */
+.subtabs{display:flex;gap:6px;padding:12px 14px 0;background:var(--tint);box-shadow:inset 0 -1.5px 0 var(--line);overflow-x:auto;scrollbar-width:thin}
+.subtab{position:relative;border:1.5px solid var(--line);border-bottom:0;background:rgba(255,255,255,.5);padding:10px 16px 11px;font-weight:700;font-size:15px;color:var(--ink-2);cursor:pointer;border-radius:12px 12px 0 0;white-space:nowrap;display:flex;gap:7px;align-items:center;flex:none;transition:background .15s ease,color .15s ease}
+.subtab:hover{background:var(--card);color:var(--ink)}
+.subtab[aria-selected="true"]{background:var(--tabc,var(--ink));border-color:var(--tabc,var(--ink));color:#fff;z-index:1}
+.subtab[aria-selected="true"]:hover{background:var(--tabc,var(--ink));color:#fff}
+.subtab:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.subtab .n{font-size:12px;background:var(--line);color:var(--ink);border-radius:9px;padding:0 7px;min-width:22px;text-align:center}
+.subtab[aria-selected="true"] .n{background:#fff;color:var(--ink)}
+.subtabs{box-shadow:none;border-bottom:3px solid var(--tabc,var(--ink))}
+.subtab:not([aria-selected="true"]){background:var(--tabsoft,var(--tint));border-color:transparent;color:var(--ink-2)}
+.subtab:not([aria-selected="true"]):hover{background:var(--tabhover,var(--line));color:var(--ink)}
+.subtab:not([aria-selected="true"]) .n{background:rgba(255,255,255,.7)}
+.subtab .n:empty{display:none}
+.card>.subtabs:first-child{border-radius:inherit;border-bottom-left-radius:0;border-bottom-right-radius:0}
+#app-donor{--tabc:var(--tomato);--tabsoft:var(--tomato-soft);--tabhover:#F6CBC5} #app-kitchen{--tabc:var(--green);--tabsoft:var(--green-soft);--tabhover:#C2E4CD} #app-community{--tabc:var(--blue);--tabsoft:var(--blue-soft);--tabhover:#CCD7F7} #app-staff{--tabc:var(--ink);--tabsoft:#E4E6ED;--tabhover:#D3D6E0}
+@media (max-width:560px){.subtabs{padding:10px 10px 0;gap:4px}.subtab{padding:9px 12px 10px;font-size:14px}}
+@media (prefers-reduced-motion:reduce){.subtab{transition:none}}
 .ksum{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:center;padding:16px 20px}
 .meter{height:10px;border-radius:5px;background:var(--tint);overflow:hidden;display:flex;width:180px}
 .meter i{display:block;height:100%}
@@ -299,6 +312,8 @@ details>summary::after{content:"Show";font-weight:600;font-size:14px;color:var(-
 details[open]>summary::after{content:"Hide"}
 details[open]>summary{border-bottom:1px solid var(--line)}
 
+/* always reserve room for the scrollbar so pages don't shift sideways when switching tabs */
+html{scrollbar-gutter:stable;overflow-y:scroll}
 /* decorative shapes */
 :root{--tomato-l:#EE958C;--green-l:#86C49C;--blue-l:#90A8EC;--butter-l:#F7DE8E;--tomato-d:#A9352B;--green-d:#1F6A3E;--blue-d:#1F3E9E;--butter-d:#D9A62C}
 .decohost{position:relative}
@@ -391,13 +406,13 @@ details[open]>summary{border-bottom:1px solid var(--line)}
   </div>
   <div class="impact" id="impact"></div>
   <div class="card">
-    <div class="card-head"><h2>Open donations</h2><span class="small muted" id="donorOpenCount"></span></div>
+    <div class="subtabs" role="tablist">
+      <button class="subtab" role="tab" data-act="dtab" data-v="open">Open donations <span class="n" id="n-dopen"></span></button>
+      <button class="subtab" role="tab" data-act="dtab" data-v="done">Finished today <span class="n" id="n-ddone"></span></button>
+    </div>
     <div class="rows" id="donorOpen"></div>
+    <div class="rows" id="donorDone" hidden></div>
   </div>
-  <details class="card">
-    <summary><span id="donorDoneTitle">Finished today</span></summary>
-    <div class="rows" id="donorDone"></div>
-  </details>
 </section>
 
 <!-- KITCHEN -->
@@ -423,11 +438,17 @@ details[open]>summary{border-bottom:1px solid var(--line)}
   <div class="head">
     <div><h1 id="commTitle">Free meals near you</h1><p>Everyone is welcome. Reserve a few servings and pick a time that works for you.</p></div>
   </div>
-  <div class="card" id="myHoldsCard" hidden>
-    <div class="card-head"><h2>Your reservations</h2><span class="small muted">Show your code at the kitchen</span></div>
-    <div class="rows" id="myHolds"></div>
+  <div class="card">
+    <div class="subtabs" role="tablist">
+      <button class="subtab" role="tab" data-act="ctab" data-v="near">Meals near you <span class="n" id="n-cnear"></span></button>
+      <button class="subtab" role="tab" data-act="ctab" data-v="mine">Your reservations <span class="n" id="n-cmine"></span></button>
+    </div>
+    <div class="sortbar" id="commRadius" style="border-bottom:0"></div>
+    <div id="myHoldsCard" hidden>
+      <p class="small muted" style="padding:12px 20px 0">Show your code at the kitchen.</p>
+      <div class="rows" id="myHolds"></div>
+    </div>
   </div>
-  <div class="sortbar card" id="commRadius" style="border-bottom:1px solid var(--line)"></div>
   <div class="comm-grid" id="commGrid"></div>
 </section>
 
@@ -541,7 +562,7 @@ const avatarColor = id => AVATAR_COLORS[[...id].reduce((n,c) => n + c.charCodeAt
 
 /* ---------- State ---------- */
 let S, simNow, speed = 1;
-const ui = { screen:"home", authRole:"donor", authMode:"signin", session:null, ktab:"claim", otab:"donations", opsFilter:"active", inspectId:null, modal:null, dock:false };
+const ui = { screen:"home", authRole:"donor", authMode:"signin", session:null, ktab:"claim", otab:"donations", dtab:"open", ctab:"near", opsFilter:"active", inspectId:null, modal:null, dock:false };
 const me = () => ui.session;
 const myDonorId = () => me()?.orgId;
 const myKitchenId = () => me()?.orgId;
@@ -763,7 +784,7 @@ function nextReason(b){
 function createHold(b, qty, afterMin=0){
   const u = me();
   const h = {id:"R-" + (S.hseq++), batchId:b.id, kitchenId:b.kitchenId, name:u.name.split(" ")[0], phone:u.phone || "", qty, code:genPin(), createdAt:simNow, readyAt:simNow + afterMin*MIN, expiresAt:simNow + (afterMin + HOLD_MIN)*MIN, status:"HELD", userId:u.id, collectedAt:null};
-  S.holds.push(h);
+  S.holds.push(h); ui.ctab = "mine";   /* show the new code under "Your reservations" */
   log("COMMUNITY", h.id, `${h.name} reserved ${qty} of ${b.desc} at ${kitchen(b.kitchenId).name} · pickup ${holdWindow(h)}`, h.name);
   return h;
 }
@@ -779,7 +800,7 @@ function startSession(a){
   log("SYSTEM", null, `${a.name} signed in as ${ROLE[a.role].name.toLowerCase()}`, a.name);
   window.scrollTo(0,0); render();
 }
-function signOut(){ if (me()) log("SYSTEM", null, `${me().name} signed out`, me().name); ui.session = null; ui.screen = "home"; window.scrollTo(0,0); render(); }
+function signOut(){ if (me()) log("SYSTEM", null, `${me().name} signed out`, me().name); ui.session = null; ui.screen = "home"; ui.ktab = "claim"; ui.otab = "donations"; ui.dtab = "open"; ui.ctab = "near"; window.scrollTo(0,0); render(); }
 
 /* ---------- Illustration (original cut-paper figures, generated) ---------- */
 /* Abstract shared meal: each person is a head over an arch-shaped body, gathered around one round table and one bowl. */
@@ -1047,7 +1068,10 @@ function renderDonor(){
   const done = mine.filter(b => !open.includes(b)).sort((a,b) => b.updatedAt - a.updatedAt);
   const meals = mine.filter(b => b.status === "HANDOFF_CONFIRMED").reduce((n,b) => n + b.servings, 0);
   $("#impact").innerHTML = `<div><b>${meals}</b><span>meals donated today</span></div><div><b>${money(meals*FMV_PER_MEAL)}</b><span>estimated tax write-off</span></div><div><b>${(meals*CO2_PER_MEAL).toFixed(1)} kg</b><span>CO₂ kept out of landfill</span></div>`;
-  $("#donorOpenCount").textContent = open.length ? plural(open.length, "donation") : "";
+  $("#n-dopen").textContent = open.length || ""; $("#n-ddone").textContent = done.length || "";
+  const dtab = ui.dtab || "open";
+  document.querySelectorAll('[data-act="dtab"]').forEach(t => t.setAttribute("aria-selected", String(t.dataset.v === dtab)));
+  $("#donorOpen").hidden = dtab !== "open"; $("#donorDone").hidden = dtab !== "done";
   $("#donorOpen").innerHTML = open.length ? open.map(b => {
     let side = "", note = "";
     if (b.status === "RESERVED"){
@@ -1064,7 +1088,6 @@ function renderDonor(){
     return `<div class="row ${urgent(b) ? "urgent" : ""}"><div class="row-main"><div class="row-title">${esc(b.desc)} ${badge(b.status)}</div>
       <div class="row-meta">${b.servings} servings · ${stor(b.tag)} · ${esc(contains(b))}</div>${note}</div><div class="row-side">${side}</div></div>`;
   }).join("") : `<div class="empty">Nothing open right now. Press “Post extra food” when you have something to share.</div>`;
-  $("#donorDoneTitle").textContent = `Finished today (${done.length})`;
   $("#donorDone").innerHTML = done.length ? done.map(b => `<div class="row"><div class="row-main"><div class="row-title">${esc(b.desc)} ${badge(b.status)}</div>
     <div class="row-meta">${b.servings} servings · ${b.status === "HANDOFF_CONFIRMED" ? `to ${esc(kitchen(b.kitchenId).name)} at ${fmtShort(b.confirmedAt)} · receipt EE-${b.id.slice(2)}` : b.status === "EXPIRED" ? "no kitchen picked it up in time" : esc(b.note || "canceled")}</div></div></div>`).join("") : `<div class="empty">Nothing finished yet today.</div>`;
 }
@@ -1131,8 +1154,12 @@ function renderKitchen(){
 function renderCommunity(){
   $("#commTitle").textContent = `Hi ${me().name.split(" ")[0]}, here's what's free today`;
   const mine = S.holds.filter(h => h.userId === me().id && (h.status === "HELD" || simNow - (h.collectedAt || h.expiresAt) < 60*MIN)).sort((a,b) => a.expiresAt - b.expiresAt);
-  $("#myHoldsCard").hidden = !mine.length;
-  $("#myHolds").innerHTML = mine.map(h => { const b = batch(h.batchId), k = kitchen(h.kitchenId);
+  const ctab = ui.ctab || "near";
+  document.querySelectorAll('[data-act="ctab"]').forEach(t => t.setAttribute("aria-selected", String(t.dataset.v === ctab)));
+  $("#n-cmine").textContent = mine.filter(h => h.status === "HELD").length || "";
+  $("#myHoldsCard").hidden = ctab !== "mine"; $("#commRadius").hidden = ctab !== "near"; $("#commGrid").hidden = ctab !== "near";
+  $("#myHolds").innerHTML = mine.length ? "" : `<div class="empty">No reservations yet. Pick a meal under “Meals near you” and press Reserve.</div>`;
+  if (mine.length) $("#myHolds").innerHTML = mine.map(h => { const b = batch(h.batchId), k = kitchen(h.kitchenId);
     return `<div class="row"><div class="row-main code-card">${h.status === "HELD" ? `<span class="code">${h.code}</span>` : ""}
       <div style="min-width:0"><div class="row-title">${plural(h.qty,"serving")} of ${esc(b.desc)} ${h.status !== "HELD" ? `<span class="badge b-${h.status}">${HOLD_LABEL[h.status]}</span>` : ""}</div>
       <div class="row-meta">${esc(k.name)}, ${mapLink(k.addr)}</div>${contactLine("kitchen", k.id, "Running late? Call:")}</div></div>
@@ -1140,6 +1167,7 @@ function renderCommunity(){
   const u = me(), here = {x: u.x ?? 6, y: u.y ?? 6}, radius = u.radius || 3;
   const byDist = S.kitchens.map(k => ({k, mi: milesBetween(here, k)})).sort((a,b) => a.mi - b.mi);
   const near = byDist.filter(x => x.mi <= radius), far = byDist.filter(x => x.mi > radius);
+  $("#n-cnear").textContent = near.reduce((n, {k}) => n + S.batches.filter(b => b.status === "HANDOFF_CONFIRMED" && b.kitchenId === k.id && servingsLeft(b) > 0).length, 0) || "";
   $("#commRadius").innerHTML = `<span>Show kitchens within</span>${[1,3,5,10].map(v => `<button class="chip" data-act="comm-radius" data-v="${v}" aria-pressed="${radius === v}">${v} mi</button>`).join("")}
     <span class="small">of ${esc(u.start || "the middle of town")} · <button class="link" data-act="open-profile">change</button></span>`;
   const card = ({k, mi}) => {
@@ -1548,6 +1576,8 @@ document.addEventListener("click", async e => {
     case "cancel-hold": { const h = hold(el.dataset.id); h.status = "CANCELED"; log("COMMUNITY", h.id, `${h.name} canceled · ${h.qty} servings back on offer`, h.name); render(); break; }
     case "ktab": ui.ktab = el.dataset.v; render(); break;
     case "otab": ui.otab = el.dataset.v; render(); break;
+    case "dtab": ui.dtab = el.dataset.v; render(); break;
+    case "ctab": ui.ctab = el.dataset.v; render(); break;
     case "speed": speed = Number(el.dataset.v); render(); break;
     case "jump": simNow += Number(el.dataset.min)*MIN; log("SYSTEM", null, `Clock moved ahead ${el.dataset.min} min`, "Demo"); runJobs(); render(); break;
     case "filter": ui.opsFilter = el.dataset.v; ui.otab = "donations"; render(); break;
@@ -1575,7 +1605,7 @@ document.addEventListener("click", async e => {
       if (!t){ toast("No pickup to test. Claim a donation first."); break; }
       while (t.status === "RESERVED" && !t.locked) await verifyPin(t, wrongPinFor(t), "Coordinator test");
       ui.dock = false; render(); toast(`${t.desc}: PIN locked after 3 wrong tries.`); break; }
-    case "reset": await seed(); runJobs(); ui.session = null; ui.screen = "home"; ui.inspectId = null; ui.opsFilter = "active"; ui.dock = false; closeModal(); render(); toast("Demo data reset."); break;
+    case "reset": await seed(); runJobs(); ui.session = null; ui.screen = "home"; ui.ktab = "claim"; ui.otab = "donations"; ui.dtab = "open"; ui.ctab = "near"; ui.inspectId = null; ui.opsFilter = "active"; ui.dock = false; closeModal(); render(); toast("Demo data reset."); break;
   }
 });
 document.addEventListener("toggle", e => { if (e.target.id === "farWrap") ui.showFar = e.target.open; }, true);
