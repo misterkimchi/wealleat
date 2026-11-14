@@ -4,7 +4,8 @@
 
 WeAllEat connects businesses that have extra food (restaurants, grocers, caterers, campus dining) with nearby shelters and community kitchens that can use it right away, and lets neighbors reserve a free meal close to home.
 
-**UN SDG:** 1 – No Poverty *(confirm against your team email)*
+**UN SDG:** 1 – No Poverty
+**Team:** HarvestRelay
 **Program:** Mentor Me Collective × Google Cloud Launchpad, BUILD 2026
 
 ---
@@ -51,7 +52,9 @@ The prototype runs entirely in the browser with sample data: 5 donors, 5 kitchen
 
 ## Run it
 
-No install needed:
+**Live demo:** https://misterkimchi.github.io/wealleat/ *(once GitHub Pages is turned on)*
+
+Or run it locally with no install:
 
 1. Download or clone this repo.
 2. Open `src/web/index.html` in any browser.
@@ -70,14 +73,16 @@ API keys live in server-side secrets only. Never commit them. See `.env.example`
 
 ## Team
 
-| Name | Track | Focus |
-|---|---|---|
-| Chad Kim | | Matching rules and app architecture |
-| Scott Li | | Security, PINs and sign-in |
-| Gerson Boch | | Infrastructure and timers (holds, expiry) |
-| Babafemi Ajetunmobi | | AI and user experience |
+**Team HarvestRelay**
 
-*(Fill in each person's GCLP track and their individual contributions.)*
+| Name | GCLP track | Focus |
+|---|---|---|
+| Babafemi Ajetunmobi (Lead) | AI Cloud Leader | Workflow, product direction and the NVIDIA feature |
+| Chad Kim | Cloud Cybersecurity | Matching rules, prototype and app architecture |
+| Scott Li | Cloud Cybersecurity | Security testing, sign-in and PIN checks |
+| Gerson Boch | Cloud Engineering | Cloud services, deployment and reliability (timers, expiry) |
+
+*(Add each person's individual contributions as the project goes.)*
 
 ## Links
 
