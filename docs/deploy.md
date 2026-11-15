@@ -22,7 +22,7 @@ Cloud Run and Firestore have free tiers, but Google asks for a billing account.
 ## 3. Get an NVIDIA API key
 
 1. Go to <https://build.nvidia.com> and sign in.
-2. Open a chat model, for example **meta/llama-3.1-8b-instruct**. Check that it's available, and note its exact name.
+2. Open **nvidia/nemotron-3.5-lightning-30b-a3b** (NVIDIA's fast text chat model). Check there's no "deprecated" banner on its page. If there is, pick another text chat model and note its exact name.
 3. Click **Get API Key** and copy the key. **Don't paste it into GitHub, Slack or the code.**
 
 ## 4. Open Cloud Shell and get the code
@@ -73,7 +73,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA"
 ```bash
 gcloud run deploy wealleat --source . --region us-central1 --allow-unauthenticated \
   --set-secrets NVIDIA_API_KEY=nvidia-api-key:latest \
-  --set-env-vars NVIDIA_MODEL=meta/llama-3.1-8b-instruct \
+  --set-env-vars NVIDIA_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b \
   --max-instances 2
 ```
 

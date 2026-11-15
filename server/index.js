@@ -15,7 +15,7 @@ const { HELP_ARTICLES } = require("./help-articles");
 
 const PORT = process.env.PORT || 8080;
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY || "";          // set from Secret Manager, never committed
-const NVIDIA_MODEL = process.env.NVIDIA_MODEL || "meta/llama-3.1-8b-instruct";
+const NVIDIA_MODEL = process.env.NVIDIA_MODEL || "nvidia/nemotron-3.5-lightning-30b-a3b";
 const NVIDIA_URL = process.env.NVIDIA_URL || "https://integrate.api.nvidia.com/v1/chat/completions";
 const USE_MEMORY = process.env.USE_MEMORY === "1";                 // local testing without Google Cloud
 
@@ -122,7 +122,9 @@ app.post("/api/help", rateLimit(10, 60_000), async (req, res) => {
       body: JSON.stringify({
         model: NVIDIA_MODEL,
         messages: [{ role: "system", content: system }, { role: "user", content: question }],
-        temperature: 0.2, max_tokens: 300,
+        temperature: 0.2, max_tokens: 400,
+        // Nemotron models can "think out loud" first; turn that off so answers are quick and short.
+        ...(/nemotron/i.test(NVIDIA_MODEL) ? { chat_template_kwargs: { enable_thinking: false } } : {}),
       }),
       signal: AbortSignal.timeout(20_000),
     });

@@ -84,7 +84,7 @@ Cloud Run server (server/index.js)
 - **Secret Manager** stores the NVIDIA API key. It never reaches the browser or GitHub.
 
 **NVIDIA**
-- The **Help** panel has an **Ask a question** box. The server sends the question to an NVIDIA-hosted model (default `meta/llama-3.1-8b-instruct`, through the NVIDIA API catalog) along with WeAllEat's own help articles (`server/help-articles.js`).
+- The **Help** panel has an **Ask a question** box. The server sends the question to an NVIDIA-hosted model (default `nvidia/nemotron-3.5-lightning-30b-a3b`, through the NVIDIA API catalog) along with WeAllEat's own help articles (`server/help-articles.js`).
 - The model is told to answer **only from those articles**, never to judge food safety or allergens, and to point to 911 or Poison Control for emergencies. Matching, PINs and pickups are never decided by AI.
 - Questions are limited to 500 characters and 10 per minute per visitor.
 
