@@ -4,7 +4,9 @@ Where the prototype is today and what it needs to become a real, working product
 
 ## Today
 
-One web page (`src/web/index.html`). Everything, including the sample data, matching rules, timers and PIN checks, runs in the visitor's browser and resets on reload.
+- `src/web/index.html`: the full app (all four roles, matching rules, timers, PIN checks).
+- `server/index.js`: a Cloud Run server that serves the app, saves shared data in Firestore (`/api/state`) and runs the NVIDIA help assistant (`/api/help`).
+- Opened without the server (as a file or on GitHub Pages), the app falls back to local demo data that resets on reload.
 
 ## Target
 

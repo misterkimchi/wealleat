@@ -44,17 +44,21 @@ Good food gets thrown away every day while people nearby go without. The hard pa
 | Part | Status |
 |---|---|
 | Clickable prototype (all four roles, matching, PINs, holds, walk-ins, help center) | ✅ Done: `src/web/index.html` |
-| Real accounts and saved data (Google Cloud) | 🔲 Planned, see [docs/architecture.md](docs/architecture.md) |
-| NVIDIA model feature | 🔲 Planned, see [docs/architecture.md](docs/architecture.md) |
+| Shared, saved data on Google Cloud (Cloud Run + Firestore) | 🟡 Built in `server/`; deploy with [docs/deploy.md](docs/deploy.md) |
+| NVIDIA help assistant | 🟡 Built in `server/`; deploy with [docs/deploy.md](docs/deploy.md) |
+| Real sign-in (Firebase Authentication) | 🔲 Planned |
 | Real address → distance | 🔲 Planned (prototype uses simulated locations) |
 
 The prototype runs entirely in the browser with sample data: 5 donors, 5 kitchens and 20 batches. Accounts you create only last until the page reloads.
 
 ## Run it
 
-**Live demo:** https://misterkimchi.github.io/wealleat/ *(once GitHub Pages is turned on)*
+**Full app on Google Cloud:** *(add your Cloud Run URL here after deploying)*
+**Quick preview (GitHub Pages, demo data only):** https://misterkimchi.github.io/wealleat/
 
-Or run it locally with no install:
+To deploy the full app with Google Cloud and NVIDIA, follow **[docs/deploy.md](docs/deploy.md)**.
+
+To preview it locally with no install (demo data only, no cloud features):
 
 1. Download or clone this repo.
 2. Open `src/web/index.html` in any browser.
@@ -64,12 +68,29 @@ The yellow **Demo** button (bottom-left) lets you move the clock forward and tri
 
 ## Google Cloud + NVIDIA
 
-*(Fill in as these are built. Say where each one fits, show it in the demo, and explain how to reproduce it.)*
+```
+Browser (src/web/index.html)
+      │
+      ▼
+Cloud Run server (server/index.js)
+      ├── /api/state ──► Firestore         shared, saved app data
+      └── /api/help  ──► NVIDIA API        help assistant
+                         (key from Secret Manager)
+```
 
-- **Google Cloud:** …
-- **NVIDIA:** …
+**Google Cloud**
+- **Cloud Run** hosts the app and a small Node.js API (`server/index.js`).
+- **Firestore** saves all donations, pickups, reservations and accounts, so every device sees the same data. A donor can post on one phone and a kitchen sees it on another within seconds. Saves use a transaction, so two devices can't overwrite each other.
+- **Secret Manager** stores the NVIDIA API key. It never reaches the browser or GitHub.
 
-API keys live in server-side secrets only. Never commit them. See `.env.example`.
+**NVIDIA**
+- The **Help** panel has an **Ask a question** box. The server sends the question to an NVIDIA-hosted model (default `meta/llama-3.1-8b-instruct`, through the NVIDIA API catalog) along with WeAllEat's own help articles (`server/help-articles.js`).
+- The model is told to answer **only from those articles**, never to judge food safety or allergens, and to point to 911 or Poison Control for emergencies. Matching, PINs and pickups are never decided by AI.
+- Questions are limited to 500 characters and 10 per minute per visitor.
+
+**Reproduce it:** follow [docs/deploy.md](docs/deploy.md), then open the app in two browsers and try the Help box.
+
+API keys live in server-side secrets only. Never commit them.
 
 ## Team
 

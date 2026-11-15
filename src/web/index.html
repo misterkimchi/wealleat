@@ -314,6 +314,8 @@ details[open]>summary{border-bottom:1px solid var(--line)}
 
 /* always reserve room for the scrollbar so pages don't shift sideways when switching tabs */
 html{scrollbar-gutter:stable;overflow-y:scroll}
+.ask-row{display:flex;gap:8px}.ask-row .input{flex:1;min-width:0}
+.ask-a{margin-top:10px;padding:12px 14px;border-radius:12px;background:var(--blue-soft);font-size:15px;white-space:pre-wrap}
 /* decorative shapes */
 :root{--tomato-l:#EE958C;--green-l:#86C49C;--blue-l:#90A8EC;--butter-l:#F7DE8E;--tomato-d:#A9352B;--green-d:#1F6A3E;--blue-d:#1F3E9E;--butter-d:#D9A62C}
 .decohost{position:relative}
@@ -1322,6 +1324,20 @@ function updateTimers(){
 function toast(msg){ const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; $("#toasts").appendChild(t); setTimeout(() => t.remove(), 4200); }
 
 /* ---------- Modals ---------- */
+/* NVIDIA help assistant: the question goes to our Cloud Run server, which asks the model
+   to answer using only WeAllEat's help articles. */
+async function askHelp(){
+  const q = $("#ask-q")?.value.trim(), out = $("#ask-a"), btn = $("#ask-btn");
+  if (!q || !out) return;
+  out.hidden = false; out.textContent = "Thinking…"; btn.disabled = true;
+  try {
+    const r = await api("/api/help", {method:"POST", body: JSON.stringify({question: q, role: me()?.role || "guest"}), timeout: 25000});
+    out.textContent = r.ok ? r.body.answer : (r.body.error || "Something went wrong. Try the common issues below.");
+  } catch (err){ out.textContent = "The assistant didn't respond. Try the common issues below."; }
+  btn.disabled = false;
+}
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "ask-q"){ e.preventDefault(); askHelp(); } });
+
 function openModal(kind, id){ ui.modal = {kind, id}; drawModal(); $("#modal").hidden = false; setTimeout(() => { const f = $("#modalForm input:not([type=checkbox]):not([type=radio]), #modalForm select"); if (f) f.focus(); }, 30); }
 function closeModal(){ ui.modal = null; $("#modal").hidden = true; }
 const actions = (label, extra="") => `<div class="btn-row" style="justify-content:flex-end">${extra}<button class="btn" type="button" data-act="close">${label ? "Cancel" : "Done"}</button>${label ? `<button class="btn primary" type="submit">${label}</button>` : ""}</div>`;
@@ -1373,6 +1389,9 @@ function drawModal(done){
     f.innerHTML = `<h2>Get help</h2>
       <div class="emergency"><b>Emergency?</b> If someone is hurt or in danger, call <b>911</b>. If someone got sick from food, call 911 or Poison Control at <b style="white-space:nowrap">1-800-222-1222</b>.</div>
       <div><h3 style="margin-bottom:4px">WeAllEat support</h3><div class="contact">${telLink(FAKE_PHONE)}<span class="muted">·</span>${mailLink("support@wealleat.test")}</div><p class="small muted">Every day, 7 AM–10 PM. Placeholder contact details for this prototype.</p></div>
+      ${CLOUD.assistant ? `<div class="ask"><h3 style="margin-bottom:2px">Ask a question</h3><p class="small muted" style="margin-bottom:8px">Answers come from our help articles, powered by NVIDIA AI. It can't judge food safety or change pickups.</p>
+        <div class="ask-row"><input class="input" id="ask-q" maxlength="500" placeholder="e.g. I missed my pickup, what now?" aria-label="Your question"><button type="button" class="btn primary" data-act="ask-help" id="ask-btn">Ask</button></div>
+        <div class="ask-a" id="ask-a" hidden aria-live="polite"></div></div>` : ""}
       <div><h3 style="margin-bottom:2px">Common issues</h3><p class="small muted" style="margin-bottom:8px">Quick answers that might save you a call.</p><div class="faq">${FAQ.map(([q,a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join("")}</div></div>
       ${r === "staff" ? "" : `<div class="form" style="gap:10px"><h3>Message support</h3>
         <div class="field"><label for="t-topic">What's it about?</label><select class="input" id="t-topic" style="width:100%"><option>A pickup or handoff</option><option>Food safety concern</option><option>My account</option><option>Something else</option></select></div>
@@ -1559,6 +1578,7 @@ document.addEventListener("click", async e => {
     case "open-profile": openModal("profile"); break;
     case "comm-radius": me().radius = Number(el.dataset.v); render(); break;
     case "open-help": openModal("help"); break;
+    case "ask-help": askHelp(); break;
     case "resolve-ticket": { const t = S.tickets.find(x => x.id === el.dataset.id); t.resolved = true; log("SYSTEM", null, `Support message resolved: ${t.topic}`, me()?.name || "Support"); render(); toast("Marked resolved."); break; }
     case "self-newpin": { if (b.selfPinUsed || !b.locked) break; b.pin = genPin(); b.pinHash = await sha256(pinMaterial(b, b.pin)); b.locked = false; b.attempts = 0; b.selfPinUsed = true;
       log("PIN", b.id, "Kitchen got a new PIN after a lockout · old PIN no longer works", kitchen(b.kitchenId).name); render(); toast(`New PIN: ${b.pin}. Read it to the donor.`); break; }
@@ -1605,15 +1625,66 @@ document.addEventListener("click", async e => {
       if (!t){ toast("No pickup to test. Claim a donation first."); break; }
       while (t.status === "RESERVED" && !t.locked) await verifyPin(t, wrongPinFor(t), "Coordinator test");
       ui.dock = false; render(); toast(`${t.desc}: PIN locked after 3 wrong tries.`); break; }
-    case "reset": await seed(); runJobs(); ui.session = null; ui.screen = "home"; ui.ktab = "claim"; ui.otab = "donations"; ui.dtab = "open"; ui.ctab = "near"; ui.inspectId = null; ui.opsFilter = "active"; ui.dock = false; closeModal(); render(); toast("Demo data reset."); break;
+    case "reset": await seed(); runJobs(); if (CLOUD.on) await saveNow().catch(() => {}); ui.session = null; ui.screen = "home"; ui.ktab = "claim"; ui.otab = "donations"; ui.dtab = "open"; ui.ctab = "near"; ui.inspectId = null; ui.opsFilter = "active"; ui.dock = false; closeModal(); render(); toast("Demo data reset."); break;
   }
 });
 document.addEventListener("toggle", e => { if (e.target.id === "farWrap") ui.showFar = e.target.open; }, true);
 document.addEventListener("change", e => { if (e.target.id === "inspectSel"){ ui.inspectId = e.target.value; render(); } });
 
+/* ---------- Cloud sync (Google Cloud Run + Firestore) ----------
+   When the page is served by our Cloud Run server, all app data is saved in Firestore,
+   so every device sees the same donations, pickups and reservations.
+   Opened as a plain file or on GitHub Pages, there's no server, so it uses local demo data. */
+const CLOUD = { on:false, version:0, synced:"", busy:false, assistant:false };
+async function api(path, opts={}){
+  const r = await fetch(path, {...opts, headers:{"Content-Type":"application/json"}, signal: AbortSignal.timeout(opts.timeout || 8000)});
+  const body = await r.json().catch(() => ({}));
+  return {status: r.status, ok: r.ok, body};
+}
+const stateJSON = () => JSON.stringify(S);
+function packState(){ return JSON.stringify({S: {...S, log: S.log.slice(-400)}, simNow, savedAt: Date.now()}); }
+function adoptState(rec){
+  const d = JSON.parse(rec.data);
+  S = d.S; simNow = d.simNow + Math.max(0, Date.now() - d.savedAt);
+  CLOUD.version = rec.version; CLOUD.synced = stateJSON();
+  if (ui.session) ui.session = S.accounts.find(a => a.id === ui.session.id) || null;   // keep the signed-in person
+  if (!ui.session && ui.screen === "app") ui.screen = "home";
+}
+async function saveNow(){
+  const now = stateJSON();
+  const r = await api("/api/state", {method:"PUT", body: JSON.stringify({data: packState(), baseVersion: CLOUD.version})});
+  if (r.ok){ CLOUD.version = r.body.version; CLOUD.synced = now; }
+  else if (r.status === 409 && r.body.current){ adoptState(r.body.current); renderLive(); }   // another device saved first: use theirs
+}
+async function cloudTick(){
+  if (!CLOUD.on || CLOUD.busy) return;
+  CLOUD.busy = true;
+  try {
+    if (stateJSON() !== CLOUD.synced) await saveNow();                     // we changed something: save it
+    else {                                                                // otherwise check for changes from other devices
+      const r = await api("/api/state");
+      if (r.ok && r.body.data && r.body.version > CLOUD.version){ adoptState(r.body); renderLive(); }
+    }
+  } catch (err){ /* offline for a moment: try again next tick */ }
+  CLOUD.busy = false;
+}
+async function cloudStart(){
+  try {
+    const h = await api("/api/health", {timeout: 2500});
+    if (!h.ok || !h.body.ok) return;
+    CLOUD.on = true; CLOUD.assistant = !!h.body.assistant;
+    const r = await api("/api/state");
+    if (r.ok && r.body.data) adoptState(r.body);
+    else await saveNow();                                                  // first run: store the starter data
+    setInterval(cloudTick, 2500);
+  } catch (err){ CLOUD.on = false; }
+}
+
 /* ---------- Boot ---------- */
 (async function boot(){
-  await seed(); runJobs(); render();
+  await seed(); runJobs();
+  await cloudStart();
+  runJobs(); render();
   setInterval(() => {
     if (!speed) return;
     simNow += 1000*speed;
