@@ -1389,7 +1389,7 @@ function drawModal(done){
     f.innerHTML = `<h2>Get help</h2>
       <div class="emergency"><b>Emergency?</b> If someone is hurt or in danger, call <b>911</b>. If someone got sick from food, call 911 or Poison Control at <b style="white-space:nowrap">1-800-222-1222</b>.</div>
       <div><h3 style="margin-bottom:4px">WeAllEat support</h3><div class="contact">${telLink(FAKE_PHONE)}<span class="muted">·</span>${mailLink("support@wealleat.test")}</div><p class="small muted">Every day, 7 AM–10 PM. Placeholder contact details for this prototype.</p></div>
-      ${CLOUD.assistant ? `<div class="ask"><h3 style="margin-bottom:2px">Ask a question</h3><p class="small muted" style="margin-bottom:8px">Answers come from our help articles, powered by NVIDIA AI. It can't judge food safety or change pickups.</p>
+      ${CLOUD.assistant ? `<div class="ask"><h3 style="margin-bottom:2px">Ask a question</h3><p class="small muted" style="margin-bottom:8px">Answers come from our help articles, powered by NVIDIA AI. It can't judge food safety or change pickups. <b>Please don't include names, phone numbers or addresses</b>; questions are sent to NVIDIA to answer.</p>
         <div class="ask-row"><input class="input" id="ask-q" maxlength="500" placeholder="e.g. I missed my pickup, what now?" aria-label="Your question"><button type="button" class="btn primary" data-act="ask-help" id="ask-btn">Ask</button></div>
         <div class="ask-a" id="ask-a" hidden aria-live="polite"></div></div>` : ""}
       <div><h3 style="margin-bottom:2px">Common issues</h3><p class="small muted" style="margin-bottom:8px">Quick answers that might save you a call.</p><div class="faq">${FAQ.map(([q,a]) => `<details><summary>${q}</summary><p>${a}</p></details>`).join("")}</div></div>
