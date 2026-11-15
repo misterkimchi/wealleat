@@ -44,8 +44,8 @@ Good food gets thrown away every day while people nearby go without. The hard pa
 | Part | Status |
 |---|---|
 | Clickable prototype (all four roles, matching, PINs, holds, walk-ins, help center) | ✅ Done: `src/web/index.html` |
-| Shared, saved data on Google Cloud (Cloud Run + Firestore) | 🟡 Built in `server/`; deploy with [docs/deploy.md](docs/deploy.md) |
-| NVIDIA help assistant | 🟡 Built in `server/`; deploy with [docs/deploy.md](docs/deploy.md) |
+| Shared, saved data on Google Cloud (Cloud Run + Firestore) | ✅ Live on Cloud Run (`server/`) |
+| NVIDIA help assistant (Nemotron) | ✅ Live: Help → "Ask a question" |
 | Real sign-in (Firebase Authentication) | 🔲 Planned |
 | Real address → distance | 🔲 Planned (prototype uses simulated locations) |
 
@@ -53,7 +53,7 @@ The prototype runs entirely in the browser with sample data: 5 donors, 5 kitchen
 
 ## Run it
 
-**Full app on Google Cloud:** *(add your Cloud Run URL here after deploying)*
+**Live app (Google Cloud Run):** https://wealleat-108914034539.us-central1.run.app
 **Quick preview (GitHub Pages, demo data only):** https://misterkimchi.github.io/wealleat/
 
 To deploy the full app with Google Cloud and NVIDIA, follow **[docs/deploy.md](docs/deploy.md)**.
@@ -113,9 +113,13 @@ API keys live in server-side secrets only. Never commit them.
 
 ## Future ideas
 
+*Breadcrumbs for the next cohort: good places to build on WeAllEat.*
+
+
 - Real address lookup, with live traffic shown as information only (never used for matching).
 - Text-message alerts when food is posted nearby.
 - Donor tax receipts and monthly impact reports.
+- Real sign-in with Firebase Authentication, and moving the matching rules onto the server.
 - Better impact numbers: food weight from meals (about 1.2 lb per meal) and emissions avoided, using published factors.
 
 ## License
