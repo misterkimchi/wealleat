@@ -108,9 +108,9 @@ API keys live in server-side secrets only. Never commit them.
 
 ## Links
 
-- Demo video: *(add)*
-- Presentation deck: *(add)*
-- Written summary: *(add)*
+- Demo video: [WeAllEat Demo Video](https://drive.google.com/file/d/1fLfXKWkgaCF5qsCDyu38kpPu3VzCAzxw/view?usp=sharing)
+- Presentation deck: [WeAllEat Presentation](https://drive.google.com/file/d/11yZM170XWTLeeyYYZGpeCf2iEOPnv92S/view?usp=sharing)
+- Written summary: [WeAllEat Written Summary](https://drive.google.com/file/d/1Vwj2L6MKLdk9cMHh0vFGxW3a7kADFS70/view?usp=sharing)
 
 ## Future ideas
 
